@@ -1,0 +1,45 @@
+spring:
+  application:
+    name: karatly
+  datasource:
+    # Port 5434, not 5432, so Karatly's database does not clash with Duewise's when both run.
+    url: ${DB_URL:jdbc:postgresql://localhost:5434/karatly}
+    username: ${DB_USERNAME:karatly}
+    password: ${DB_PASSWORD:karatly}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate   # Flyway owns the schema; Hibernate only checks it matches
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  flyway:
+    locations: classpath:db/migration
+
+server:
+  # 8081, not 8080, so Karatly and Duewise can run side by side from IntelliJ.
+  port: ${SERVER_PORT:8081}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+
+karatly:
+  api:
+    # Filled in from pom.xml at build time, so Swagger always shows the built version.
+    version: '@project.version@'
+  # Decides what "today" is: which day's rate a sale uses and how long a lot has been held.
+  time-zone: ${KARATLY_TIME_ZONE:Asia/Kolkata}

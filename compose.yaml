@@ -1,0 +1,46 @@
+# Local services for Karatly.
+#   docker compose up -d                        start Postgres (run the app from your IDE)
+#   docker compose --profile app up -d --build  also build and start the app on http://localhost:8081
+#   docker compose --profile app down           stop everything (data is kept in the karatly-pgdata volume)
+#   docker compose down -v                      stop and delete the database
+#
+# Ports 5434 and 8081 (not 5432 and 8080) so Karatly runs next to Duewise without clashes.
+name: karatly
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: karatly
+      POSTGRES_USER: karatly
+      POSTGRES_PASSWORD: karatly
+    ports:
+      - "${POSTGRES_PORT:-5434}:5432"
+    volumes:
+      - karatly-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U karatly -d karatly"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # The application, built from the Dockerfile. Only started with --profile app, so the normal
+  # development setup (app in the IDE, database in Docker) is unchanged.
+  app:
+    profiles: ["app"]
+    build: .
+    image: karatly-api:local
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      # Inside Docker's network the database is reached by name, not localhost.
+      DB_URL: jdbc:postgresql://postgres:5432/karatly
+      DB_USERNAME: karatly
+      DB_PASSWORD: karatly
+      KARATLY_TIME_ZONE: ${KARATLY_TIME_ZONE:-Asia/Kolkata}
+    ports:
+      - "${APP_PORT:-8081}:8081"
+
+volumes:
+  karatly-pgdata:
