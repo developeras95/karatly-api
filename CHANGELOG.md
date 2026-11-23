@@ -25,6 +25,12 @@ MAJOR for breaking API changes, MINOR for new features, PATCH for fixes.
   palladium (999, 950).
 - Migration `V3`: `purity`, `metal_rate`, `rate_premium`, `rate_provider_call`.
 
+### Fixed
+
+- Validation errors in a request body on an endpoint that also has a constrained path parameter (e.g.
+  `PUT /api/v1/rates/premiums/{metal}`) named the whole body (`request`) instead of the invalid field
+  (`premiumPercent`).
+
 ### Added (M0: skeleton)
 
 - Project skeleton: Spring Boot 4.1, Java 21, PostgreSQL with Flyway, RFC 7807 error responses, OpenAPI

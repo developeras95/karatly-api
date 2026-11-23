@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
+import org.springframework.validation.method.ParameterErrors;
 import org.springframework.validation.method.ParameterValidationResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -77,13 +78,28 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return handleExceptionInternal(ex, body, headers, status, request);
     }
 
-    /** A constraint on a query or path parameter failed. Same shape as body validation errors. */
+    /**
+     * A constraint on a query or path parameter failed, or a @Valid body on an endpoint that also has a
+     * constrained parameter (Spring then validates them all together). Same shape as body validation errors,
+     * with body fields named individually.
+     */
     @Override
     protected ResponseEntity<Object> handleHandlerMethodValidationException(
             HandlerMethodValidationException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
 
         List<FieldViolation> violations = new ArrayList<>();
         for (ParameterValidationResult result : ex.getParameterValidationResults()) {
+            if (result instanceof ParameterErrors bodyErrors) {
+                // A @Valid request body, validated together with constrained path or query parameters:
+                // report each invalid field by name, exactly as handleMethodArgumentNotValid does.
+                for (FieldError error : bodyErrors.getFieldErrors()) {
+                    violations.add(new FieldViolation(error.getField(), error.getDefaultMessage()));
+                }
+                for (ObjectError error : bodyErrors.getGlobalErrors()) {
+                    violations.add(new FieldViolation(error.getObjectName(), error.getDefaultMessage()));
+                }
+                continue;
+            }
             String parameter = result.getMethodParameter().getParameterName();
             for (MessageSourceResolvable error : result.getResolvableErrors()) {
                 violations.add(new FieldViolation(parameter, error.getDefaultMessage()));
