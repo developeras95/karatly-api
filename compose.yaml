@@ -39,6 +39,10 @@ services:
       DB_USERNAME: karatly
       DB_PASSWORD: karatly
       KARATLY_TIME_ZONE: ${KARATLY_TIME_ZONE:-Asia/Kolkata}
+      # Rates: set these in a .env file next to this one (see .env.example).
+      KARATLY_RATES_FETCHES_PER_DAY: ${KARATLY_RATES_FETCHES_PER_DAY:-2}
+      KARATLY_GOLDAPI_IO_API_KEY: ${KARATLY_GOLDAPI_IO_API_KEY:-}
+      KARATLY_GOLDPRICE_DEV_API_KEY: ${KARATLY_GOLDPRICE_DEV_API_KEY:-}
     ports:
       - "${APP_PORT:-8081}:8081"
 

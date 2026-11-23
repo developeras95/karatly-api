@@ -9,9 +9,12 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
  *
  * <p>The container is started once and shared by every integration test class (the "singleton
  * container" pattern), so the database boots once per test run instead of once per class.
- * {@link ServiceConnection} points the application's datasource at it automatically.
+ * {@link ServiceConnection} points the application's datasource at it automatically. The rate job and
+ * fetching on read are switched off, so no test calls an outside rate API.
  */
-@SpringBootTest
+@SpringBootTest(properties = {
+        "karatly.rates.scheduler-enabled=false",
+        "karatly.rates.refresh-on-read=false"})
 public abstract class AbstractIntegrationTest {
 
     @ServiceConnection

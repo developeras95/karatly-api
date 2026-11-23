@@ -43,3 +43,34 @@ karatly:
     version: '@project.version@'
   # Decides what "today" is: which day's rate a sale uses and how long a lot has been held.
   time-zone: ${KARATLY_TIME_ZONE:Asia/Kolkata}
+  rates:
+    # Rates are fetched and stored in this currency.
+    currency: ${KARATLY_RATES_CURRENCY:INR}
+    # How often a day rates are fetched, for every metal. Cache lifetime (TTL) = 24 h / this value
+    # (4 → 6 hours): a provider is only called when one of its cached rates was updated longer ago.
+    fetches-per-day: ${KARATLY_RATES_FETCHES_PER_DAY:2}
+    # The background job checks the cache this often and fetches whatever is past the TTL.
+    # Spring cron: second minute hour day month weekday.
+    scheduler-enabled: ${KARATLY_RATES_SCHEDULER_ENABLED:true}
+    check-cron: '${KARATLY_RATES_CHECK_CRON:0 */15 * * * *}'
+    # Also fetch rates that are past the TTL when the latest rates are read.
+    refresh-on-read: ${KARATLY_RATES_REFRESH_ON_READ:true}
+    # After a provider fails, wait this long before calling it again (unless a refresh is forced).
+    retry-after: ${KARATLY_RATES_RETRY_AFTER:30m}
+    # goldprice.dev: gold, silver, copper. Free plan: 5,000 requests a month; works without a key too.
+    # One fetch = 2 requests (1 when the currency is USD).
+    goldprice-dev:
+      enabled: ${KARATLY_GOLDPRICE_DEV_ENABLED:true}
+      base-url: ${KARATLY_GOLDPRICE_DEV_BASE_URL:https://api.goldprice.dev}
+      api-key: ${KARATLY_GOLDPRICE_DEV_API_KEY:}
+      monthly-budget: ${KARATLY_GOLDPRICE_DEV_MONTHLY_BUDGET:4500}
+      timeout: ${KARATLY_GOLDPRICE_DEV_TIMEOUT:10s}
+    # goldapi.io: platinum, palladium. Free plan: 150 requests a month; needs a key.
+    # One fetch = 2 requests (one per metal): 2 fetches a day use about 124 a month, so keep
+    # fetches-per-day at 2 or less while on the free plan (the budget below stops it going over anyway).
+    goldapi-io:
+      enabled: ${KARATLY_GOLDAPI_IO_ENABLED:true}
+      base-url: ${KARATLY_GOLDAPI_IO_BASE_URL:https://www.goldapi.io}
+      api-key: ${KARATLY_GOLDAPI_IO_API_KEY:}
+      monthly-budget: ${KARATLY_GOLDAPI_IO_MONTHLY_BUDGET:140}
+      timeout: ${KARATLY_GOLDAPI_IO_TIMEOUT:10s}
