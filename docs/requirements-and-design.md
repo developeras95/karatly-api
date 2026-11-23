@@ -4,7 +4,7 @@
 |---|---|
 | Status | Draft 0.1, for review |
 | Owner | Abhijit Saha |
-| Last updated | 2026-11-22 |
+| Last updated | 2026-11-23 |
 | Scope | Personal project first; designed so it can become a product later |
 
 ---
@@ -236,7 +236,7 @@ Reference data:
 
 | Table | Key columns |
 |---|---|
-| `metal` | `code` (XAU, XAG, XPT, XPD), name, active |
+| `metal` | `code` (XAU, XAG, XPT, XPD, XCU), name, active |
 | `weight_unit` | `code` (G, MG, KG, OZT, TOLA), name, grams_per_unit |
 | `purity` | id, metal_code, label (24K, 22K, 999, 925), fineness (0.999, 0.916…) |
 | `holding_form` | `code` (COIN, BAR, JEWELLERY, DIGITAL, ETF, SGB, …), category, quantity_type (WEIGHT/UNITS) |
@@ -248,7 +248,9 @@ Rates:
 
 | Table | Key columns |
 |---|---|
-| `metal_rate` | metal, purity basis, currency, rate_per_gram, rate_date, source, kind (MARKET / BUYBACK / MANUAL), fetched_at |
+| `metal_rate` | metal, currency, rate_date, source (GOLDPRICE_DEV / GOLDAPI_IO / MANUAL), spot_price_per_gram, premium_percent, price_per_gram, priced_at, updated_at. One row per metal, currency, day and source; also the TTL cache (built in M1) |
+| `rate_premium` | metal, premium_percent (premium over spot, e.g. import duty) |
+| `rate_provider_call` | provider, called_at, requests, success, message (quota and retry guard) |
 | `instrument_price` | instrument (ETF/fund/SGB symbol), currency, price, price_date, source |
 | `fx_rate` | from, to, rate, rate_date |
 
@@ -320,7 +322,7 @@ Features: `reference`, `rate`, `portfolio` (holdings, transactions, lots), `quot
 | # | Decision | Proposal |
 |---|---|---|
 | D1 | Cost basis includes making, tax and charges? | Yes by default, show both views; confirm with a CA. |
-| D2 | Rate provider for India | Start with a free metals API in INR; evaluate IBJA rates as the reference. |
+| D2 | Rate provider for India | **Decided (M1):** goldprice.dev for gold, silver and copper; goldapi.io for platinum and palladium; both free plans. One `fetches-per-day` setting for all metals; TTL = 24 h / fetches-per-day, checked against the cached rate's updated_at. India gap: a configurable premium % per metal, and a manual (IBJA) rate wins for its day. |
 | D3 | Sign-in | Email + password for MVP, Google sign-in in v1. |
 | D4 | Rate the purchase form expects | Pure (24K/999) rate × purity, with an option to enter the purity-specific rate directly. |
 | D5 | Hosting for the MVP | Local + tunnel first, then free tier. |
@@ -330,7 +332,7 @@ Features: `reference`, `rate`, `portfolio` (holdings, transactions, lots), `quot
 | Milestone | Content |
 |---|---|
 | M0 | Skeletons, CI, this document (done when both repos build). |
-| M1 | Reference data + rate fetch + rate history. |
+| M1 | Rates: copper, purities, rate fetch from two providers with a TTL cache, premiums, manual rates, rate history. Region and user currency move to M4 with sign-in. |
 | M2 | Purchases with charge breakdown + quote endpoint + holdings. |
 | M3 | Sales with FIFO lots + sell simulator + realised P&L. |
 | M4 | Web UI for M1–M3; MVP complete. |

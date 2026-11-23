@@ -21,7 +21,7 @@ class ReferenceDataApiIntegrationTest extends AbstractIntegrationTest {
     void metalsAreListedInDisplayOrder() throws Exception {
         mvc.perform(get("/api/v1/metals"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[*].code", contains("XAU", "XAG", "XPT", "XPD")));
+                .andExpect(jsonPath("$[*].code", contains("XAU", "XAG", "XPT", "XPD", "XCU")));
     }
 
     @Test
@@ -45,5 +45,16 @@ class ReferenceDataApiIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$[*].code", contains("G", "MG", "KG", "OZT", "TOLA")))
                 .andExpect(jsonPath("$[?(@.code == 'TOLA')].gramsPerUnit").value(11.6638038))
                 .andExpect(jsonPath("$[?(@.code == 'KG')].gramsPerUnit").value(1000));
+    }
+
+    @Test
+    void puritiesAreListedPerMetal() throws Exception {
+        mvc.perform(get("/api/v1/purities").param("metal", "xau"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[*].label", contains("24K (999)", "24K (995)", "22K (916)", "18K (750)", "14K (585)")))
+                .andExpect(jsonPath("$[2].fineness").value(0.916));
+        mvc.perform(get("/api/v1/purities"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(11));
     }
 }
