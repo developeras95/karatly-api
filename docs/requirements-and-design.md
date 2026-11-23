@@ -329,11 +329,17 @@ Features: `reference`, `rate`, `portfolio` (holdings, transactions, lots), `quot
 
 ## 14. Milestones
 
-| Milestone | Content |
-|---|---|
-| M0 | Skeletons, CI, this document (done when both repos build). |
-| M1 | Rates: copper, purities, rate fetch from two providers with a TTL cache, premiums, manual rates, rate history. Region and user currency move to M4 with sign-in. |
-| M2 | Purchases with charge breakdown + quote endpoint + holdings. |
-| M3 | Sales with FIFO lots + sell simulator + realised P&L. |
-| M4 | Web UI for M1–M3; MVP complete. |
-| M5 | v1: advisor board, alerts, XIRR, reports. |
+Every milestone ships in both repositories: the API first, then the screens for it in karatly-web on a matching
+branch, so each milestone ends with something to see and use in the browser.
+
+| Milestone | karatly-api | karatly-web |
+|---|---|---|
+| M0 | Skeleton, CI, reference data, this document. **Done.** | Skeleton, CI, dashboard with API status. **Done.** |
+| M1 | Rates: copper, purities, two providers with a TTL cache, premiums, manual rates, rate history. | Rates page: today's rate per metal and purity, history chart, manual rate entry, premium settings, provider quota status. |
+| M2 | Purchases with charge breakdown, quote endpoint, lots, holdings. | Purchase form with live cost breakdown, holdings page. |
+| M3 | Sales with FIFO lots, sell simulator, realised P&L. | Sale form, sell simulator (metal-only vs true profit), realised P&L. |
+| M4 | Sign-in, users, region and currency. | Sign-in, polish, first hosted version. MVP complete. |
+| M5 | v1: advisor board, alerts, XIRR, reports. | Screens for each v1 feature as it lands. |
+
+Branch names follow `<type>/<milestone>-<area>/<short-description>` in both repositories, e.g.
+`feature/m1-rates/fetch-daily-rates-with-ttl-cache` (API) and `feature/m1-rates/rates-page` (web).
